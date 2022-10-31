@@ -69,18 +69,18 @@ int main(int argc, char const *argv[])
     if(pid==0) {
 	// change hello message to verify message is being sent from child
 	hello = "Hello from server child."
-	// add comment here why this function was used
+	// obtain ID of "nobody" user
 	struct passwd* nobody_pwd=getpwnam("nobody");
-        // add comment here why this function was used
+    // drop privileges to "nobody" user
 	setuid(nobody_pwd -> pw_uid);	
-	// add comment here why code was moved
+	// read values sent by the client
 	valread = read( new_socket , buffer, 1024);
 	printf("%s\n",buffer );
 	send(new_socket , hello , strlen(hello) , 0 );
 	printf("Hello message sent from child process\n");
  
     }
-    // add comment here why this function was used.
+    // wait for child process to exit
     wait(NULL);
     return 0;
 }
