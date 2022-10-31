@@ -3,10 +3,11 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/socket.h>
+#include <sys/wait.h>
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
-
+#include <pwd.h>
 #define PORT 8080
 int main(int argc, char const *argv[])
 {
@@ -14,7 +15,7 @@ int main(int argc, char const *argv[])
     struct sockaddr_in address;
     int opt = 1;
     int addrlen = sizeof(address);
-    char buffer[102] = {0};
+    char buffer[1024] = {0};
     char *hello = "Hello from server";
 
     printf("execve=0x%p\n", execve);
@@ -55,9 +56,31 @@ int main(int argc, char const *argv[])
         perror("accept");
         exit(EXIT_FAILURE);
     }
-    valread = read( new_socket , buffer, 1024);
-    printf("%s\n",buffer );
-    send(new_socket , hello , strlen(hello) , 0 );
-    printf("Hello message sent\n");
+
+    // Socket attachment complete, now we will insert privilege separation logic here.
+   
+
+    pid_t pid = fork();
+
+    if(pid<0) {
+    	printf("fork failed");
+	exit(1);
+    }
+    if(pid==0) {
+	// change hello message to verify message is being sent from child
+	hello = "Hello from server child."
+	// add comment here why this function was used
+	struct passwd* nobody_pwd=getpwnam("nobody");
+        // add comment here why this function was used
+	setuid(nobody_pwd -> pw_uid);	
+	// add comment here why code was moved
+	valread = read( new_socket , buffer, 1024);
+	printf("%s\n",buffer );
+	send(new_socket , hello , strlen(hello) , 0 );
+	printf("Hello message sent from child process\n");
+ 
+    }
+    // add comment here why this function was used.
+    wait(NULL);
     return 0;
 }
