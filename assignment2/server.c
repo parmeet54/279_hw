@@ -85,7 +85,7 @@ int main(int argc, char const *argv[])
     	hello = "Hello from server child."
     	// obtain ID of "nobody" user
     	struct passwd* nobody_pwd=getpwnam("nobody");
-        	// drop privileges to "nobody" user
+        // drop privileges to "nobody" user
     	setuid(nobody_pwd -> pw_uid);	
 
         // handle socket passing from server to exec'd child
