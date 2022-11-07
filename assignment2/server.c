@@ -76,15 +76,19 @@ int main(int argc, char const *argv[])
 
     pid_t pid = fork();
 
-    if(pid<0) {
+    if(pid<0)
+    {
     	printf("fork failed");
     	exit(1);
     }
-    if(pid==0) {
+    
+    if(pid==0)
+    {
     	// change hello message to verify message is being sent from child
     	hello = "Hello from server child."
     	// obtain ID of "nobody" user
     	struct passwd* nobody_pwd=getpwnam("nobody");
+        
         // drop privileges to "nobody" user
     	setuid(nobody_pwd -> pw_uid);	
 
@@ -95,8 +99,10 @@ int main(int argc, char const *argv[])
 
         // re-exec the process
         int valid = execvp(argv[0], args);
+        
         // check if re-exec worked
-        if(valid < 0) {
+        if(valid < 0) 
+        {
             printf("could not re-exec process\n");
             exit(1);
         }
