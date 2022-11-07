@@ -20,6 +20,20 @@ int main(int argc, char const *argv[])
 
     printf("execve=0x%p\n", execve);
 
+    // Pass socket file descriptor
+    if(strcmp(argv[0], "child_proc") == 0)
+    {
+        // pass from server to exec'd child
+        // using command line argument: argv
+        int socket_to_pass = atoi(argv[1]);
+        // read values sent by the client
+        valread = read( socket_to_pass, buffer, 1024);
+        printf("%s\n",buffer );
+        send(socket_to_pass , hello , strlen(hello) , 0 );
+        printf("Hello message sent from child process\n");
+        exit(0);
+    }
+
     // Creating socket file descriptor
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
     {
@@ -64,21 +78,28 @@ int main(int argc, char const *argv[])
 
     if(pid<0) {
     	printf("fork failed");
-	exit(1);
+    	exit(1);
     }
     if(pid==0) {
-	// change hello message to verify message is being sent from child
-	hello = "Hello from server child."
-	// obtain ID of "nobody" user
-	struct passwd* nobody_pwd=getpwnam("nobody");
-    	// drop privileges to "nobody" user
-	setuid(nobody_pwd -> pw_uid);	
-	// read values sent by the client
-	valread = read( new_socket , buffer, 1024);
-	printf("%s\n",buffer );
-	send(new_socket , hello , strlen(hello) , 0 );
-	printf("Hello message sent from child process\n");
- 
+    	// change hello message to verify message is being sent from child
+    	hello = "Hello from server child."
+    	// obtain ID of "nobody" user
+    	struct passwd* nobody_pwd=getpwnam("nobody");
+        	// drop privileges to "nobody" user
+    	setuid(nobody_pwd -> pw_uid);	
+
+        // handle socket passing from server to exec'd child
+    	char str[10];
+        snprintf(str, 10, "%d", socket_to_pass);
+        char *args[] = {"child_proc", str, NULL};
+
+        // re-exec the process
+        int valid = execvp(argv[0], args);
+        // check if re-exec worked
+        if(valid < 0) {
+            printf("could not re-exec process\n");
+            exit(1);
+        }
     }
     // wait for child process to exit
     wait(NULL);
